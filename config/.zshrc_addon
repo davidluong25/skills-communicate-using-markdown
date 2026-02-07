@@ -164,7 +164,9 @@ if command -v compdef &> /dev/null; then
         fi
     }
     
+    # Completion for orc_switch function defined above
     compdef _orc_tasks orc_switch
+    # Completion for orc clean command (provided by main orc CLI)
     compdef _orc_tasks orc_clean
 fi
 

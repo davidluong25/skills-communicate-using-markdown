@@ -465,6 +465,7 @@ fi
 ### Git Worktrees
 - [Git Worktree Documentation](https://git-scm.com/docs/git-worktree)
 - Use case: Parallel branch development
+- **Minimum version required:** Git v2.15+ (for stable worktree support)
 
 ### Tmux
 - [Tmux Manual](https://man7.org/linux/man-pages/man1/tmux.1.html)

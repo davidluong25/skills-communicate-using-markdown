@@ -177,7 +177,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
         # Add to .gitignore if not already there
         GITIGNORE="${REPO_ROOT}/.gitignore"
         if [ -f "$GITIGNORE" ]; then
-            if ! grep -q "^\.worktrees/" "$GITIGNORE" 2>/dev/null; then
+            if ! grep -q "^[[:space:]]*\.worktrees/" "$GITIGNORE" 2>/dev/null; then
                 echo "" >> "$GITIGNORE"
                 echo "# OrcMate worktrees" >> "$GITIGNORE"
                 echo ".worktrees/" >> "$GITIGNORE"
