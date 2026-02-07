@@ -1,81 +1,313 @@
-<header>
+# OrcMate 🦍
 
-<!--
-  <<< Author notes: Course header >>>
-  Include a 1280×640 image, course title in sentence case, and a concise description in emphasis.
-  In your repository settings: enable template repository, add your 1280×640 social image, auto delete head branches.
-  Add your open source license, GitHub uses MIT license.
--->
+> **Your Keyboard-Only AI Pair Programmer Manager**
 
-# Communicate using Markdown
-
-_Organize ideas and collaborate using Markdown, a lightweight language for text formatting._
-
-</header>
-
-<!--
-  <<< Author notes: Step 1 >>>
-  Choose 3-5 steps for your course.
-  The first step is always the hardest, so pick something easy!
-  Link to docs.github.com for further explanations.
-  Encourage users to open new tabs for steps!
--->
-
-## Step 1: Add headers
-
-_Welcome to "Communicate using Markdown"! :wave:_
-
-**What is _Markdown_?** Markdown is a [lightweight syntax](https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) for communicating on GitHub. You can format text to add a heading, lists, **bold**, _italics_, tables, and many other stylings. You can use Markdown in most places around GitHub:
-
-- Comments on [issues](https://docs.github.com/issues/tracking-your-work-with-issues/about-issues), [pull requests](https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests), and [discussions](https://docs.github.com/discussions/collaborating-with-your-community-using-discussions/about-discussions)
-- Files with the `.md` or `.markdown` extension
-- Sharing snippets of text in [Gists](https://docs.github.com/github/writing-on-github/editing-and-sharing-content-with-gists/creating-gists)
-
-**What is a _header_?** A header is a larger bit of text at the beginning of a section. There are six sizes.
-
-### Example
-
-```md
-# This is an `<h1>` header, which is the largest
-
-## This is an `<h2>` header
-
-###### This is an `<h6>` header, which is the smallest
-```
-
-#### How it looks
-
-# This is an `<h1>` header, which is the largest
-
-## This is an `<h2>` header
-
-###### This is an `<h6>` header, which is the smallest
-
-### :keyboard: Activity: Edit your file with headers
-
-1. Open a new browser tab, and work on the steps in your second tab while you read the instructions in this tab.
-1. Open the **pull requests** tab.
-1. Click **New pull request**, for the branches to compare, select `base: main` and `compare: start-markdown`.
-1. Click **Create pull request**.
-1. In this pull request, go to the **Files changed** tab. We made an empty file `index.md` for you.
-1. Select **Edit file** from the three dotted **...** menu in the upper right corner of the file view on `index.md`.
-1. On the **Edit file** tab, add a `#`, followed by a **space**, before any content you like to make it an H1 Header. You can add more headers, using one to six `#` characters followed by a **space**.
-1. Above your new content, click **Preview**.
-1. At the bottom of the page, type a short, meaningful commit message that describes the change you made to the file.
-1. Click **Commit changes**.
-1. Wait about 20 seconds then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
-
-<footer>
-
-<!--
-  <<< Author notes: Footer >>>
-  Add a link to get support, GitHub status page, code of conduct, license link.
--->
+OrcMate is a lightweight orchestrator that creates isolated, persistent, and keyboard-first development environments for AI-assisted coding. Built on top of **Git Worktrees** and **Tmux**, OrcMate eliminates the fear of AI agents messing up your main branch while keeping you in flow state.
 
 ---
 
-Get help: [Post in our discussion board](https://github.com/orgs/skills/discussions/categories/communicate-using-markdown) &bull; [Review the GitHub status page](https://www.githubstatus.com/)
+## 🎯 The Problem
 
-&copy; 2023 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
+Modern AI coding assistants (like Claude Code, GitHub Copilot, Cursor) are powerful, but developers face three major challenges:
 
-</footer>
+1. **Fear of Branch Contamination:** "What if the AI breaks my main branch?"
+2. **Lost Session State:** "I closed my terminal and lost my AI conversation!"
+3. **Mouse Distractions:** "Constantly switching between mouse and keyboard kills my flow"
+
+## ✨ The Solution
+
+OrcMate solves these with three core principles:
+
+### 1. **Isolated Environments**
+- Each task gets its own **Git Worktree** (separate directory + branch)
+- Your main branch stays pristine and untouched
+- Experiment freely without fear
+
+### 2. **Persistent Sessions**
+- **Tmux Sessions** that survive disconnects
+- Resume your AI conversation after closing the terminal
+- Perfect for remote development over SSH
+
+### 3. **Keyboard-Only Workflow**
+- Zero mouse support (by design!)
+- Vim-style navigation everywhere
+- Pure keyboard = Pure flow state
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/orcmate.git
+cd orcmate
+
+# Run the installer
+./install.sh
+```
+
+### Your First Session
+
+```bash
+# Navigate to your project
+cd /path/to/your/project
+
+# Start an OrcMate session
+orc start fix-login-bug
+
+# You'll get:
+# - A new git worktree at .worktrees/fix-login-bug
+# - A new branch: agent/fix-login-bug
+# - A tmux session with 2 panes:
+#   Pane 1 (Top, 70%): AI Assistant
+#   Pane 2 (Bottom, 30%): Testing/Monitoring
+
+# Work with AI, test your changes, commit
+
+# When done, clean up
+orc clean fix-login-bug
+```
+
+---
+
+## 📚 Core Commands
+
+| Command | Description |
+|---------|-------------|
+| `orc start <task-name>` | Create a new isolated environment |
+| `orc clean <task-name>` | Remove environment (tmux session + worktree + branch) |
+| `orc list` | List all active environments |
+| `orc help` | Show all commands and usage |
+
+---
+
+## ⌨️ Essential Keyboard Shortcuts
+
+OrcMate uses **Ctrl+Space** as the tmux prefix (more ergonomic than Ctrl+b).
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Space h/j/k/l` | Navigate between panes (Vim style) |
+| `Ctrl+Space H/J/K/L` | Resize panes |
+| `Ctrl+Space \|` | Split window vertically |
+| `Ctrl+Space -` | Split window horizontally |
+| `Ctrl+Space [` | Enter copy mode (then use `v` to select, `y` to copy) |
+| `Ctrl+Space d` | Detach from session (keeps running!) |
+| `Ctrl+Space ?` | Show all keybindings |
+
+**Pro Tip:** Run `orc_keys` (if using zsh addon) for a full reference.
+
+---
+
+## 🧠 Philosophy: Why No Mouse?
+
+### The Science of Flow State
+
+Flow state (being "in the zone") requires:
+1. **Uninterrupted focus** - Mouse switching breaks this
+2. **Muscle memory** - Keyboard shortcuts become automatic
+3. **Visual focus** - No searching for buttons/icons
+
+### The OrcMate Way
+
+```
+Traditional Workflow:          OrcMate Workflow:
+┌─────────────────┐           ┌─────────────────┐
+│ Type code       │           │ Type code       │
+│ Reach for mouse │  ❌       │ Ctrl+Space j    │  ✅
+│ Click pane      │           │ Run test        │
+│ Find terminal   │           │ Ctrl+Space k    │
+│ Type command    │           │ Continue coding │
+│ Reach for mouse │           │ [Flow state!]   │
+│ ...             │           └─────────────────┘
+└─────────────────┘
+```
+
+**Result:** 10x faster context switching, zero mental overhead.
+
+---
+
+## 🌳 Why Git Worktrees?
+
+### The Traditional Problem
+
+```bash
+# You're on main branch, working
+git checkout feature-branch  # ERROR: Uncommitted changes!
+
+# So you stash...
+git stash
+git checkout feature-branch
+# ... work on feature ...
+git checkout main
+git stash pop  # Merge conflicts! 😱
+```
+
+### The OrcMate Solution
+
+```bash
+# Your project structure with OrcMate:
+project/
+  ├── .git/                  # Shared git database
+  ├── src/                   # Your main branch (untouched!)
+  └── .worktrees/            # Isolated environments
+      ├── fix-login/         # Branch: agent/fix-login
+      ├── new-feature/       # Branch: agent/new-feature
+      └── refactoring/       # Branch: agent/refactoring
+
+# Work on multiple tasks without conflicts!
+# No more stashing!
+# No more "wait, which branch am I on?"
+```
+
+---
+
+## 🎨 Example Workflow
+
+### Scenario: Fixing a Login Bug
+
+```bash
+# 1. Start the session
+$ orc start fix-login-bug
+
+# You're now in .worktrees/fix-login-bug on branch agent/fix-login-bug
+
+# 2. In Pane 1 (Top): Chat with AI
+You: "Help me fix the login bug where null emails crash the app"
+AI: "I'll add null checking and write tests..."
+[AI makes changes]
+
+# 3. In Pane 2 (Bottom): Test the changes
+$ npm test
+✓ login with valid email
+✓ login with null email (new!)
+All tests passed!
+
+# 4. Review and commit
+$ git add .
+$ git commit -m "Fix: Handle null email in login"
+
+# 5. Merge to main (outside OrcMate)
+$ cd /path/to/main/repo
+$ git merge agent/fix-login-bug
+$ git push
+
+# 6. Clean up
+$ orc clean fix-login-bug
+✓ Environment cleaned up!
+```
+
+---
+
+## 📖 Documentation
+
+- **[Workflow Guide](docs/workflow.md)** - Complete step-by-step usage guide
+- **[Architecture](docs/architecture.md)** - How OrcMate works under the hood
+- **[Tmux Config](config/.tmux.conf)** - Customizable keyboard shortcuts
+
+---
+
+## 🛠️ Requirements
+
+- **Git** (with worktree support, v2.15+)
+- **Tmux** (v2.6+)
+- **Bash** (for the CLI script)
+- **Zsh** (optional, for shell integration)
+
+---
+
+## 🎯 Use Cases
+
+### Perfect For:
+- ✅ AI-assisted development (Claude, Copilot, Cursor)
+- ✅ Experimenting with risky refactors
+- ✅ Working on multiple features in parallel
+- ✅ Remote development over SSH
+- ✅ Pair programming with AI
+- ✅ Learning new codebases safely
+
+### Not Ideal For:
+- ❌ GUI-heavy development (OrcMate is CLI-first)
+- ❌ Single-file quick edits (use your regular editor)
+- ❌ Non-git projects (requires git repository)
+
+---
+
+## 🔧 Advanced Features
+
+### Multiple Parallel Sessions
+
+```bash
+orc start feature-auth
+orc start bugfix-validation
+orc start refactor-api
+
+# Switch between them:
+Ctrl+Space )  # Next session
+Ctrl+Space (  # Previous session
+
+# Or use the helper (with zsh addon):
+orc_switch feature-auth
+```
+
+### Detach and Resume
+
+```bash
+# Day 1: Start work
+orc start complex-feature
+[... work with AI ...]
+Ctrl+Space d  # Detach (keeps running!)
+
+# Day 2: Resume
+tmux attach -t complex-feature
+[... continue working ...]
+```
+
+### Shell Integration (Zsh)
+
+If you use zsh, the `.zshrc_addon` provides:
+- Aliases: `os`, `oc`, `ol`
+- Prompt indicator: Shows current task
+- Helper functions: `orc_status`, `orc_commit`, `orc_keys`
+
+---
+
+## 🤝 Contributing
+
+OrcMate is designed to be minimal and focused. If you have ideas:
+
+1. Keep it keyboard-first
+2. Keep it lightweight (no heavy dependencies)
+3. Keep it simple (bash + git + tmux)
+
+---
+
+## 📜 License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Credits
+
+Built with inspiration from:
+- **Git Worktrees** - For true isolation
+- **Tmux** - For persistence and layout management
+- **Vim** - For keyboard-first philosophy
+- **AI Assistants** - For making us rethink our workflows
+
+---
+
+## 💬 Philosophy
+
+> "The best tools disappear. OrcMate gets out of your way so you can focus on what matters: building great software with AI as your pair programmer."
+
+**OrcMate doesn't make you a better coder. It removes the friction that prevents you from becoming one.**
+
+---
+
+**Built with 💚 for developers who love keyboards, hate mice, and trust AI.**
+
+🦍 **OrcMate** - Your Keyboard-Only AI Pair Programmer Manager

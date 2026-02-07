@@ -1,0 +1,182 @@
+# OrcMate Shell Integration for Zsh
+# Add this to your ~/.zshrc: source /path/to/orcmate/config/.zshrc_addon
+
+# ═══════════════════════════════════════════════════════════
+# ORCMATE ALIASES
+# ═══════════════════════════════════════════════════════════
+
+# Quick OrcMate commands
+alias os='orc start'
+alias oc='orc clean'
+alias ol='orc list'
+
+# Git aliases optimized for OrcMate workflow
+alias gws='git worktree list'
+alias gwp='git worktree prune'
+
+# Tmux aliases
+alias ta='tmux attach -t'
+alias tl='tmux list-sessions'
+alias tn='tmux new -s'
+alias tk='tmux kill-session -t'
+
+# ═══════════════════════════════════════════════════════════
+# ORCMATE ENVIRONMENT DETECTION
+# ═══════════════════════════════════════════════════════════
+
+# Check if we're in an OrcMate worktree
+is_orcmate_worktree() {
+    if [[ "$PWD" == *"/.worktrees/"* ]]; then
+        return 0
+    fi
+    return 1
+}
+
+# Get current OrcMate task name
+get_orcmate_task() {
+    if is_orcmate_worktree; then
+        echo "$PWD" | sed 's|.*/.worktrees/\([^/]*\).*|\1|'
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════
+# PROMPT CUSTOMIZATION
+# ═══════════════════════════════════════════════════════════
+
+# Add OrcMate indicator to prompt (if in worktree)
+if is_orcmate_worktree; then
+    ORCMATE_TASK=$(get_orcmate_task)
+    export PS1="%F{cyan}🦍 [${ORCMATE_TASK}]%f ${PS1}"
+fi
+
+# ═══════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ═══════════════════════════════════════════════════════════
+
+# Quick switch between OrcMate sessions
+orc_switch() {
+    if [ -z "$1" ]; then
+        echo "Usage: orc_switch <task-name>"
+        return 1
+    fi
+    
+    if tmux has-session -t "$1" 2>/dev/null; then
+        tmux switch-client -t "$1" 2>/dev/null || tmux attach -t "$1"
+    else
+        echo "Session '$1' not found. Available sessions:"
+        tmux list-sessions 2>/dev/null || echo "  (none)"
+    fi
+}
+
+# Quick commit in OrcMate workflow
+orc_commit() {
+    if ! is_orcmate_worktree; then
+        echo "Not in an OrcMate worktree"
+        return 1
+    fi
+    
+    local message="$*"
+    if [ -z "$message" ]; then
+        echo "Usage: orc_commit <commit message>"
+        return 1
+    fi
+    
+    git add -A
+    git commit -m "$message"
+    echo "✓ Committed to branch: $(git branch --show-current)"
+}
+
+# Show OrcMate status (quick overview)
+orc_status() {
+    if ! is_orcmate_worktree; then
+        echo "Not in an OrcMate worktree"
+        return 1
+    fi
+    
+    local task=$(get_orcmate_task)
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🦍 OrcMate Task: $task"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "📂 Current directory: $PWD"
+    echo "🌿 Branch: $(git branch --show-current)"
+    echo ""
+    git status -s
+    echo ""
+}
+
+# Alias for status
+alias ost='orc_status'
+
+# ═══════════════════════════════════════════════════════════
+# KEYBOARD PRODUCTIVITY TIPS
+# ═══════════════════════════════════════════════════════════
+
+# Display keyboard shortcuts reminder
+orc_keys() {
+    cat << 'EOF'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🦍 OrcMate Keyboard Shortcuts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TMUX ESSENTIALS (Prefix: Ctrl+Space):
+  Ctrl+Space h/j/k/l    Navigate panes (Vim style)
+  Ctrl+Space H/J/K/L    Resize panes
+  Ctrl+Space |          Split vertically
+  Ctrl+Space -          Split horizontally
+  Ctrl+Space [          Copy mode (v=select, y=copy)
+  Ctrl+Space d          Detach from session
+  Ctrl+Space ?          Show all keybindings
+
+ORCMATE COMMANDS:
+  os <name>             Start new task (alias: orc start)
+  oc <name>             Clean up task (alias: orc clean)
+  ol                    List all environments (alias: orc list)
+  ost                   Show current task status
+  orc_switch <name>     Switch to another task session
+
+GIT WORKFLOW:
+  gws                   List all worktrees
+  git add -A && git commit -m "msg"
+  git push origin agent/<task-name>
+
+TIPS:
+  - Stay in keyboard mode - no mouse!
+  - Use Tmux pane 1 for AI, pane 2 for testing
+  - Commit often, clean up when done
+  - Keep your flow state! 🎯
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+}
+
+# ═══════════════════════════════════════════════════════════
+# AUTO-COMPLETION (if available)
+# ═══════════════════════════════════════════════════════════
+
+# Auto-complete task names for orc commands
+if command -v compdef &> /dev/null; then
+    _orc_tasks() {
+        local repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+        if [ -n "$repo_root" ] && [ -d "${repo_root}/.worktrees" ]; then
+            local tasks=(${repo_root}/.worktrees/*(N:t))
+            _describe 'task' tasks
+        fi
+    }
+    
+    # Completion for orc_switch function defined above
+    compdef _orc_tasks orc_switch
+    # Completion for orc clean command (provided by main orc CLI)
+    compdef _orc_tasks orc_clean
+fi
+
+# ═══════════════════════════════════════════════════════════
+# WELCOME MESSAGE (Optional - comment out if annoying)
+# ═══════════════════════════════════════════════════════════
+
+if [ -n "$TMUX" ] && is_orcmate_worktree; then
+    echo ""
+    echo "🦍 OrcMate: Task '$(get_orcmate_task)' loaded"
+    echo "Type 'orc_keys' for keyboard shortcuts"
+    echo ""
+fi
