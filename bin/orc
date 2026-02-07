@@ -65,7 +65,7 @@ get_repo_root() {
 
 # Start a new OrcMate session
 orc_start() {
-    local task_name="$1"
+    local task_name="${1:-}"
     
     if [ -z "$task_name" ]; then
         error "Task name is required. Usage: orc start <task-name>"
@@ -156,7 +156,7 @@ orc_start() {
 
 # Clean up an OrcMate session
 orc_clean() {
-    local task_name="$1"
+    local task_name="${1:-}"
     
     if [ -z "$task_name" ]; then
         error "Task name is required. Usage: orc clean <task-name>"
