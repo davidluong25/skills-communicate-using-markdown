@@ -13,10 +13,11 @@ Modern AI coding assistants (like Claude Code, GitHub Copilot, Cursor) are power
 1. **Fear of Branch Contamination:** "What if the AI breaks my main branch?"
 2. **Lost Session State:** "I closed my terminal and lost my AI conversation!"
 3. **Mouse Distractions:** "Constantly switching between mouse and keyboard kills my flow"
+4. **Monitoring AI Work:** "How do I track what my AI agents are doing across multiple sessions?"
 
 ## ✨ The Solution
 
-OrcMate solves these with three core principles:
+OrcMate solves these with four core principles:
 
 ### 1. **Isolated Environments**
 - Each task gets its own **Git Worktree** (separate directory + branch)
@@ -32,6 +33,11 @@ OrcMate solves these with three core principles:
 - Zero mouse support (by design!)
 - Vim-style navigation everywhere
 - Pure keyboard = Pure flow state
+
+### 4. **Real-Time Monitoring** 🆕
+- **File Watcher** automatically syncs Claude Code changes
+- **Dashboard** for centralized monitoring across all agents
+- Track tasks, logs, and configurations in real-time
 
 ---
 
@@ -205,7 +211,47 @@ $ orc clean fix-login-bug
 
 - **[Workflow Guide](docs/workflow.md)** - Complete step-by-step usage guide
 - **[Architecture](docs/architecture.md)** - How OrcMate works under the hood
+- **[Claude Monitoring System](docs/claude-monitoring.md)** - File watcher and dashboard integration
 - **[Tmux Config](config/.tmux.conf)** - Customizable keyboard shortcuts
+
+---
+
+## 🔍 Claude Code Monitoring System
+
+OrcMate now includes a powerful file monitoring system that automatically tracks and syncs Claude Code changes to a centralized dashboard.
+
+### Quick Setup
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your API key
+
+# 3. Start the server (Terminal 1)
+npm run server
+
+# 4. Start the watcher (Terminal 2)
+npm start
+```
+
+### What It Does
+
+- **Watches** `~/.claude/teams/` and `~/.claude/tasks/` directories
+- **Detects** file additions and changes in real-time
+- **Uploads** changes to server with authentication
+- **Displays** all agent activities in a centralized dashboard
+
+### Architecture
+
+```
+Claude Code → File Watcher → API Server → Dashboard UI
+   (local)      (chokidar)    (Express)    (React/Vue)
+```
+
+For complete documentation, see **[Claude Monitoring Guide](docs/claude-monitoring.md)**.
 
 ---
 
@@ -214,6 +260,8 @@ $ orc clean fix-login-bug
 - **Git** (with worktree support, v2.15+)
 - **Tmux** (v2.6+)
 - **Bash** (for the CLI script)
+- **Node.js** (v14+ for monitoring system)
+- **npm** (for Node.js dependencies)
 - **Zsh** (optional, for shell integration)
 
 ---
