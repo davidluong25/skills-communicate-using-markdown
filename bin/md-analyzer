@@ -1,0 +1,324 @@
+#!/usr/bin/env bash
+
+# Markdown Analyzer and Runner
+# Analyzes project structure and processes markdown documentation
+
+set -euo pipefail
+
+VERSION="1.0.0"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Helper functions
+error() {
+    echo -e "${RED}ERROR:${NC} $1" >&2
+    exit 1
+}
+
+success() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+info() {
+    echo -e "${BLUE}→${NC} $1"
+}
+
+warn() {
+    echo -e "${YELLOW}!${NC} $1"
+}
+
+header() {
+    echo ""
+    echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${CYAN}  $1${NC}"
+    echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+}
+
+# Show usage
+show_usage() {
+    cat << EOF
+${BOLD}Markdown Analyzer and Runner v${VERSION}${NC}
+
+${BOLD}USAGE:${NC}
+    md-analyzer [COMMAND]
+
+${BOLD}COMMANDS:${NC}
+    analyze         Analyze all markdown files in the project
+    list            List all markdown files
+    view <file>     View a specific markdown file with syntax highlighting
+    tree            Show project structure tree
+    stats           Show markdown statistics
+    help            Show this help message
+
+${BOLD}EXAMPLES:${NC}
+    md-analyzer analyze           # Analyze all markdown files
+    md-analyzer list              # List all markdown files
+    md-analyzer view README.md    # View README.md
+    md-analyzer tree              # Show project tree
+    md-analyzer stats             # Show statistics
+
+EOF
+}
+
+# Find all markdown files
+find_markdown_files() {
+    find . -type f -name "*.md" ! -path "./.git/*" | sort
+}
+
+# Analyze markdown file content
+analyze_markdown_file() {
+    local file="$1"
+    local lines=$(wc -l < "$file" 2>/dev/null || echo "0")
+    local words=$(wc -w < "$file" 2>/dev/null || echo "0")
+    local chars=$(wc -c < "$file" 2>/dev/null || echo "0")
+    local headers=$(grep -c "^#" "$file" 2>/dev/null || echo "0")
+    local code_blocks=$(grep -c '```' "$file" 2>/dev/null || echo "0")
+    # Ensure code_blocks is numeric and divide by 2 (pairs of ```)
+    code_blocks=$(echo "$code_blocks" | tr -cd '0-9')
+    [ -z "$code_blocks" ] && code_blocks=0
+    code_blocks=$((code_blocks / 2))
+    local links=$(grep -o '\[.*\](.*)'  "$file" 2>/dev/null | wc -l | tr -cd '0-9')
+    [ -z "$links" ] && links=0
+    local images=$(grep -o '!\[.*\](.*)'  "$file" 2>/dev/null | wc -l | tr -cd '0-9')
+    [ -z "$images" ] && images=0
+    
+    echo "$file|$lines|$words|$chars|$headers|$code_blocks|$links|$images"
+}
+
+# Command: analyze
+cmd_analyze() {
+    header "📊 Markdown Analysis Report"
+    
+    info "Scanning for markdown files..."
+    local md_files=$(find_markdown_files)
+    local file_count=$(echo "$md_files" | grep -c "." || echo "0")
+    
+    if [ "$file_count" -eq 0 ]; then
+        warn "No markdown files found in the project."
+        exit 0
+    fi
+    
+    success "Found $file_count markdown file(s)"
+    echo ""
+    
+    # Analyze each file
+    echo -e "${BOLD}File Analysis:${NC}"
+    echo ""
+    printf "%-40s %8s %8s %10s %8s %8s %8s %8s\n" "FILE" "LINES" "WORDS" "CHARS" "HEADERS" "CODE" "LINKS" "IMAGES"
+    printf "%-40s %8s %8s %10s %8s %8s %8s %8s\n" "----" "-----" "-----" "-----" "-------" "----" "-----" "------"
+    
+    local total_lines=0
+    local total_words=0
+    local total_chars=0
+    local total_headers=0
+    local total_code=0
+    local total_links=0
+    local total_images=0
+    
+    while IFS= read -r file; do
+        if [ -n "$file" ]; then
+            local result=$(analyze_markdown_file "$file")
+            IFS='|' read -r fname lines words chars headers code links images <<< "$result"
+            
+            # Trim path for display
+            local display_name="${fname#./}"
+            if [ ${#display_name} -gt 38 ]; then
+                display_name="...${display_name: -35}"
+            fi
+            
+            printf "%-40s %8d %8d %10d %8d %8d %8d %8d\n" \
+                "$display_name" "$lines" "$words" "$chars" "$headers" "$code" "$links" "$images"
+            
+            total_lines=$((total_lines + lines))
+            total_words=$((total_words + words))
+            total_chars=$((total_chars + chars))
+            total_headers=$((total_headers + headers))
+            total_code=$((total_code + code))
+            total_links=$((total_links + links))
+            total_images=$((total_images + images))
+        fi
+    done <<< "$md_files"
+    
+    echo ""
+    printf "%-40s %8s %8s %10s %8s %8s %8s %8s\n" "----" "-----" "-----" "-----" "-------" "----" "-----" "------"
+    printf "${BOLD}%-40s %8d %8d %10d %8d %8d %8d %8d${NC}\n" \
+        "TOTAL" "$total_lines" "$total_words" "$total_chars" "$total_headers" "$total_code" "$total_links" "$total_images"
+    
+    echo ""
+    success "Analysis complete!"
+}
+
+# Command: list
+cmd_list() {
+    header "📄 Markdown Files"
+    
+    local md_files=$(find_markdown_files)
+    local file_count=$(echo "$md_files" | grep -c "." || echo "0")
+    
+    if [ "$file_count" -eq 0 ]; then
+        warn "No markdown files found in the project."
+        exit 0
+    fi
+    
+    echo -e "${BOLD}Found $file_count file(s):${NC}"
+    echo ""
+    
+    local num=1
+    while IFS= read -r file; do
+        if [ -n "$file" ]; then
+            local size=$(du -h "$file" | cut -f1)
+            echo -e "  ${GREEN}$num.${NC} ${file#./} ${BLUE}($size)${NC}"
+            num=$((num + 1))
+        fi
+    done <<< "$md_files"
+    
+    echo ""
+}
+
+# Command: view
+cmd_view() {
+    local file="${1:-}"
+    
+    if [ -z "$file" ]; then
+        error "Please specify a markdown file to view."
+    fi
+    
+    if [ ! -f "$file" ]; then
+        error "File not found: $file"
+    fi
+    
+    header "📖 Viewing: $file"
+    
+    # Check if bat is available for syntax highlighting
+    if command -v bat &> /dev/null; then
+        bat --style=plain --language=markdown "$file"
+    elif command -v pygmentize &> /dev/null; then
+        pygmentize -l markdown "$file"
+    else
+        # Fallback to cat with manual highlighting
+        cat "$file" | while IFS= read -r line; do
+            if [[ "$line" =~ ^#+ ]]; then
+                echo -e "${BOLD}${BLUE}$line${NC}"
+            elif [[ "$line" =~ ^\`\`\` ]]; then
+                echo -e "${YELLOW}$line${NC}"
+            elif [[ "$line" =~ ^\* ]]; then
+                echo -e "${GREEN}$line${NC}"
+            else
+                echo "$line"
+            fi
+        done
+    fi
+    
+    echo ""
+}
+
+# Command: tree
+cmd_tree() {
+    header "🌳 Project Structure"
+    
+    if command -v tree &> /dev/null; then
+        tree -L 3 -I '.git|node_modules|.worktrees' --dirsfirst
+    else
+        info "Installing tree view..."
+        find . -not -path '*/\.git/*' -not -path '*/node_modules/*' -not -path '*/.worktrees/*' | \
+            sed -e 's/[^\/]*\//│   /g' -e 's/│   \([^│]\)/└── \1/' | head -50
+    fi
+    
+    echo ""
+}
+
+# Command: stats
+cmd_stats() {
+    header "📈 Markdown Statistics"
+    
+    local md_files=$(find_markdown_files)
+    local file_count=$(echo "$md_files" | grep -c "." || echo "0")
+    
+    if [ "$file_count" -eq 0 ]; then
+        warn "No markdown files found in the project."
+        exit 0
+    fi
+    
+    # Calculate statistics
+    local total_size=0
+    local largest_file=""
+    local largest_size=0
+    
+    while IFS= read -r file; do
+        if [ -n "$file" ]; then
+            local size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+            total_size=$((total_size + size))
+            
+            if [ "$size" -gt "$largest_size" ]; then
+                largest_size=$size
+                largest_file="$file"
+            fi
+        fi
+    done <<< "$md_files"
+    
+    # Format sizes
+    local total_kb=$((total_size / 1024))
+    local largest_kb=$((largest_size / 1024))
+    
+    echo -e "${BOLD}Project Statistics:${NC}"
+    echo ""
+    echo -e "  ${CYAN}Total markdown files:${NC} $file_count"
+    echo -e "  ${CYAN}Total size:${NC} ${total_kb}KB"
+    echo -e "  ${CYAN}Average size:${NC} $((total_kb / file_count))KB"
+    echo -e "  ${CYAN}Largest file:${NC} ${largest_file#./} (${largest_kb}KB)"
+    echo ""
+    
+    # Documentation coverage
+    local has_readme=$(find . -maxdepth 1 -iname "readme.md" -type f | wc -l)
+    local has_license=$(find . -maxdepth 1 -iname "license*" -type f | wc -l)
+    local has_docs_dir=$([ -d "docs" ] && echo "1" || echo "0")
+    
+    echo -e "${BOLD}Documentation Coverage:${NC}"
+    echo ""
+    [ "$has_readme" -gt 0 ] && echo -e "  ${GREEN}✓${NC} README.md" || echo -e "  ${RED}✗${NC} README.md"
+    [ "$has_license" -gt 0 ] && echo -e "  ${GREEN}✓${NC} LICENSE" || echo -e "  ${RED}✗${NC} LICENSE"
+    [ "$has_docs_dir" -eq 1 ] && echo -e "  ${GREEN}✓${NC} docs/ directory" || echo -e "  ${RED}✗${NC} docs/ directory"
+    echo ""
+}
+
+# Main command router
+main() {
+    local command="${1:-help}"
+    
+    case "$command" in
+        analyze)
+            cmd_analyze
+            ;;
+        list)
+            cmd_list
+            ;;
+        view)
+            shift
+            cmd_view "$@"
+            ;;
+        tree)
+            cmd_tree
+            ;;
+        stats)
+            cmd_stats
+            ;;
+        help|--help|-h)
+            show_usage
+            ;;
+        *)
+            error "Unknown command: $command\nRun 'md-analyzer help' for usage information."
+            ;;
+    esac
+}
+
+# Run main
+main "$@"
