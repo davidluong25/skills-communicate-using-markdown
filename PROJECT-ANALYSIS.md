@@ -7,7 +7,7 @@ This project combines two main components:
 1. **OrcMate** - A keyboard-first AI pair programmer manager using Git worktrees and Tmux
 2. **Markdown Analyzer** - A comprehensive tool for analyzing and managing markdown documentation
 
-Generated on: $(date)
+Generated: February 2026
 
 ---
 
@@ -396,6 +396,6 @@ The markdown analyzer tool successfully addresses the requirement to "analyze th
 
 ---
 
-**Last Updated**: $(date)  
+**Last Updated**: February 2026  
 **Project Version**: 1.0.0  
 **Status**: Active Development
