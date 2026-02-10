@@ -39,3 +39,10 @@ Thumbs.db
 # OrcMate worktrees #
 #####################
 .worktrees/
+
+# Rust build artifacts #
+########################
+/target/
+src-tauri/target/
+**/*.rs.bk
+Cargo.lock

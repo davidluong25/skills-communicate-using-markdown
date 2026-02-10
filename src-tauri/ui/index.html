@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OrcMate</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #2E3440;
+      color: #D8DEE9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 { color: #88C0D0; font-size: 2rem; margin-bottom: 0.5rem; }
+    .subtitle { color: #5E81AC; margin-bottom: 2rem; }
+    .card {
+      background: #3B4252;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 1rem;
+    }
+    .card h2 { color: #88C0D0; font-size: 1.2rem; margin-bottom: 1rem; }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #4C566A;
+      border-radius: 8px;
+      background: #2E3440;
+      color: #ECEFF4;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #88C0D0;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-start { background: #A3BE8C; color: #2E3440; }
+    .btn-clean { background: #BF616A; color: #ECEFF4; }
+    .btn-list { background: #5E81AC; color: #ECEFF4; }
+    #output {
+      background: #2E3440;
+      border: 1px solid #4C566A;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      min-height: 120px;
+      color: #A3BE8C;
+    }
+    .footer {
+      margin-top: 2rem;
+      color: #4C566A;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🦍 OrcMate</h1>
+  <p class="subtitle">Keyboard-First AI Terminal Environment Manager</p>
+
+  <div class="card">
+    <h2>Task Management</h2>
+    <input type="text" id="taskName" placeholder="Enter task name (e.g., fix-login-bug)" />
+    <div>
+      <button class="btn btn-start" id="btnStart">⚡ Start</button>
+      <button class="btn btn-clean" id="btnClean">🗑 Clean</button>
+      <button class="btn btn-list" id="btnList">📋 List</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Output</h2>
+    <div id="output">Ready. Enter a task name and click Start to begin.</div>
+  </div>
+
+  <p class="footer">OrcMate v0.2.0 — Built with Rust + Tauri</p>
+
+  <script>
+    // Tauri API integration placeholder
+    // When running as a Tauri app, this will use window.__TAURI__ invoke
+    const output = document.getElementById('output');
+
+    async function invoke(cmd, args) {
+      if (window.__TAURI__) {
+        return await window.__TAURI__.invoke(cmd, args);
+      }
+      return `[Preview] Would invoke: ${cmd}(${JSON.stringify(args)})`;
+    }
+
+    document.getElementById('btnStart').addEventListener('click', async () => {
+      const name = document.getElementById('taskName').value.trim();
+      if (!name) { output.textContent = 'Error: Please enter a task name.'; return; }
+      output.textContent = `Starting environment: ${name}...\n`;
+      try {
+        const result = await invoke('start_task', { taskName: name });
+        output.textContent += result;
+      } catch (e) {
+        output.textContent += `Error: ${e}`;
+      }
+    });
+
+    document.getElementById('btnClean').addEventListener('click', async () => {
+      const name = document.getElementById('taskName').value.trim();
+      if (!name) { output.textContent = 'Error: Please enter a task name.'; return; }
+      output.textContent = `Cleaning environment: ${name}...\n`;
+      try {
+        const result = await invoke('clean_task', { taskName: name });
+        output.textContent += result;
+      } catch (e) {
+        output.textContent += `Error: ${e}`;
+      }
+    });
+
+    document.getElementById('btnList').addEventListener('click', async () => {
+      output.textContent = 'Listing environments...\n';
+      try {
+        const result = await invoke('list_tasks', {});
+        output.textContent += result;
+      } catch (e) {
+        output.textContent += `Error: ${e}`;
+      }
+    });
+
+    // Keyboard shortcut: Enter to start
+    document.getElementById('taskName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnStart').click();
+    });
+  </script>
+</body>
+</html>

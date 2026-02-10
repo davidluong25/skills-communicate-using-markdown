@@ -2,7 +2,16 @@
 
 > **Your Keyboard-Only AI Pair Programmer Manager**
 
-OrcMate is a lightweight orchestrator that creates isolated, persistent, and keyboard-first development environments for AI-assisted coding. Built on top of **Git Worktrees** and **Tmux**, OrcMate eliminates the fear of AI agents messing up your main branch while keeping you in flow state.
+OrcMate is a lightweight orchestrator that creates isolated, persistent, and keyboard-first development environments for AI-assisted coding. Built with **Rust** and **Tauri**, on top of **Git Worktrees** and **Tmux**, OrcMate eliminates the fear of AI agents messing up your main branch while keeping you in flow state.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Rust** — Core logic and CLI (`orcmate` binary)
+- **Tauri** — Desktop GUI (optional, for visual task management)
+- **Git Worktrees** — Isolated branch checkouts
+- **Tmux** — Persistent terminal sessions
 
 ---
 
@@ -44,8 +53,25 @@ OrcMate solves these with three core principles:
 git clone https://github.com/your-org/orcmate.git
 cd orcmate
 
-# Run the installer
+# Build from source (Rust required)
+cargo build --release
+
+# The binary will be at target/release/orcmate
+# Optionally copy to your PATH:
+cp target/release/orcmate /usr/local/bin/
+
+# Or use the legacy bash installer for shell integration:
 ./install.sh
+```
+
+### Running Tests
+
+```bash
+# Run all tests (TDD)
+cargo test
+
+# Run tests with output
+cargo test -- --nocapture
 ```
 
 ### Your First Session
@@ -55,7 +81,7 @@ cd orcmate
 cd /path/to/your/project
 
 # Start an OrcMate session
-orc start fix-login-bug
+orcmate start fix-login-bug
 
 # You'll get:
 # - A new git worktree at .worktrees/fix-login-bug
@@ -67,7 +93,7 @@ orc start fix-login-bug
 # Work with AI, test your changes, commit
 
 # When done, clean up
-orc clean fix-login-bug
+orcmate clean fix-login-bug
 ```
 
 ---
@@ -76,10 +102,10 @@ orc clean fix-login-bug
 
 | Command | Description |
 |---------|-------------|
-| `orc start <task-name>` | Create a new isolated environment |
-| `orc clean <task-name>` | Remove environment (tmux session + worktree + branch) |
-| `orc list` | List all active environments |
-| `orc help` | Show all commands and usage |
+| `orcmate start <task-name>` | Create a new isolated environment |
+| `orcmate clean <task-name>` | Remove environment (tmux session + worktree + branch) |
+| `orcmate list` | List all active environments |
+| `orcmate help` | Show all commands and usage |
 
 ---
 
@@ -211,10 +237,33 @@ $ orc clean fix-login-bug
 
 ## 🛠️ Requirements
 
+- **Rust** (1.70+ for building from source)
 - **Git** (with worktree support, v2.15+)
 - **Tmux** (v2.6+)
-- **Bash** (for the CLI script)
-- **Zsh** (optional, for shell integration)
+
+## 🏗️ Project Structure
+
+```
+orcmate/
+├── Cargo.toml              # Workspace configuration
+├── src-tauri/
+│   ├── Cargo.toml          # Rust crate configuration
+│   ├── src/
+│   │   ├── lib.rs          # Core library exports
+│   │   ├── main.rs         # CLI entry point (clap)
+│   │   ├── config.rs       # Constants and configuration
+│   │   ├── git.rs          # Git worktree operations
+│   │   ├── tmux.rs         # Tmux session management
+│   │   ├── env_file.rs     # .env file handling
+│   │   └── error.rs        # Error types (thiserror)
+│   ├── ui/
+│   │   └── index.html      # Tauri GUI (Nord theme)
+│   └── tauri.conf.json     # Tauri configuration
+├── bin/orc                 # Legacy Bash CLI (kept for reference)
+├── config/                 # Tmux & Zsh configurations
+├── docs/                   # Documentation
+└── install.sh              # Legacy installer
+```
 
 ---
 
@@ -240,9 +289,9 @@ $ orc clean fix-login-bug
 ### Multiple Parallel Sessions
 
 ```bash
-orc start feature-auth
-orc start bugfix-validation
-orc start refactor-api
+orcmate start feature-auth
+orcmate start bugfix-validation
+orcmate start refactor-api
 
 # Switch between them:
 Ctrl+Space )  # Next session
@@ -256,7 +305,7 @@ orc_switch feature-auth
 
 ```bash
 # Day 1: Start work
-orc start complex-feature
+orcmate start complex-feature
 [... work with AI ...]
 Ctrl+Space d  # Detach (keeps running!)
 
@@ -279,8 +328,8 @@ If you use zsh, the `.zshrc_addon` provides:
 OrcMate is designed to be minimal and focused. If you have ideas:
 
 1. Keep it keyboard-first
-2. Keep it lightweight (no heavy dependencies)
-3. Keep it simple (bash + git + tmux)
+2. Keep it lightweight (Rust + git + tmux)
+3. Write tests for new features (TDD)
 
 ---
 
@@ -293,6 +342,8 @@ MIT License - See [LICENSE](LICENSE) file for details.
 ## 🙏 Credits
 
 Built with inspiration from:
+- **Rust** - For performance and safety
+- **Tauri** - For lightweight cross-platform GUI
 - **Git Worktrees** - For true isolation
 - **Tmux** - For persistence and layout management
 - **Vim** - For keyboard-first philosophy
@@ -308,6 +359,6 @@ Built with inspiration from:
 
 ---
 
-**Built with 💚 for developers who love keyboards, hate mice, and trust AI.**
+**Built with 💚 in Rust for developers who love keyboards, hate mice, and trust AI.**
 
 🦍 **OrcMate** - Your Keyboard-Only AI Pair Programmer Manager

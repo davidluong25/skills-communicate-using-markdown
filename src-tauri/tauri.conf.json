@@ -1,0 +1,20 @@
+{
+  "productName": "OrcMate",
+  "version": "0.2.0",
+  "identifier": "com.orcmate.app",
+  "build": {
+    "frontendDist": "./ui"
+  },
+  "app": {
+    "title": "OrcMate",
+    "windows": [
+      {
+        "title": "OrcMate - AI Terminal Environment Manager",
+        "width": 700,
+        "height": 550,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  }
+}
