@@ -55,9 +55,16 @@ pub fn create_session(task_name: &str, worktree_path: &str) -> Result<()> {
     }
 
     // Select the top pane
-    let _ = Command::new("tmux")
+    let output = Command::new("tmux")
         .args(["select-pane", "-t", &format!("{}:0.0", task_name)])
         .output()?;
+
+    if !output.status.success() {
+        return Err(OrcError::TmuxError(format!(
+            "Failed to select pane: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
 
     // Send message to top pane
     let claude_available = Command::new("which")
@@ -72,21 +79,35 @@ pub fn create_session(task_name: &str, worktree_path: &str) -> Result<()> {
         "echo 'OrcMate Action Pane - Start your AI assistant here (e.g., claude)'"
     };
 
-    let _ = Command::new("tmux")
+    let output = Command::new("tmux")
         .args([
             "send-keys", "-t", &format!("{}:0.0", task_name),
             top_cmd, "C-m",
         ])
         .output()?;
 
+    if !output.status.success() {
+        return Err(OrcError::TmuxError(format!(
+            "Failed to initialize top pane: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
     // Send message to bottom pane
-    let _ = Command::new("tmux")
+    let output = Command::new("tmux")
         .args([
             "send-keys", "-t", &format!("{}:0.1", task_name),
             "echo 'OrcMate Monitor Pane - Run tests, logs, and commands here'",
             "C-m",
         ])
         .output()?;
+
+    if !output.status.success() {
+        return Err(OrcError::TmuxError(format!(
+            "Failed to initialize bottom pane: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
 
     Ok(())
 }

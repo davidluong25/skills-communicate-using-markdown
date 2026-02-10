@@ -1,5 +1,4 @@
 {
-  "$schema": "https://raw.githubusercontent.com/nicegui/nicegui-tauri/main/src-tauri/tauri.conf.json",
   "productName": "OrcMate",
   "version": "0.2.0",
   "identifier": "com.orcmate.app",
