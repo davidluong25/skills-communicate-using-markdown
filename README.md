@@ -206,6 +206,44 @@ $ orc clean fix-login-bug
 - **[Workflow Guide](docs/workflow.md)** - Complete step-by-step usage guide
 - **[Architecture](docs/architecture.md)** - How OrcMate works under the hood
 - **[Tmux Config](config/.tmux.conf)** - Customizable keyboard shortcuts
+- **[Markdown Analyzer Guide](docs/md-analyzer-guide.md)** - Analyze and process markdown files
+- **[Vietnamese Guide](docs/VIETNAMESE-GUIDE.md)** - Hướng dẫn tiếng Việt
+
+---
+
+## 📊 Markdown Analyzer
+
+This project includes a powerful Markdown Analyzer tool that helps you analyze, view, and manage all markdown documentation.
+
+### Quick Start
+
+```bash
+# List all markdown files
+./bin/md-analyzer list
+
+# Analyze all files
+./bin/md-analyzer analyze
+
+# Show statistics
+./bin/md-analyzer stats
+
+# View a specific file
+./bin/md-analyzer view README.md
+
+# Run interactive demo
+./demo.sh
+```
+
+### Features
+
+- 📄 **File Discovery**: Automatically finds all `.md` files
+- 📊 **Analysis**: Lines, words, chars, headers, code blocks, links, images
+- 📈 **Statistics**: Project-wide documentation metrics
+- 👁️ **File Viewer**: View markdown with syntax highlighting
+- 🌳 **Tree View**: Project structure visualization
+- 🌐 **Vietnamese Support**: Full Vietnamese documentation
+
+See [Markdown Analyzer Guide](docs/md-analyzer-guide.md) for detailed documentation.
 
 ---
 
